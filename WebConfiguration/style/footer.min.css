@@ -1,0 +1,125 @@
+footer {
+  font-size: var(--fnt-sizeDefault);
+  line-height: 1.5;
+  padding: 20px 10%;
+  background: var(--clr-brightAccent);
+}
+
+.footer-text {
+  margin-bottom: 20px;
+  cursor: default;
+}
+
+.footer-text,
+.footer-sections .footer-section .footer-title,
+.footer-sections .footer-section .footer-link {
+  color: var(--clr-gray);
+  padding: 3px 15px;
+  display: block;
+}
+
+footer hr {
+  height: 1px;
+  border: none;
+  background: var(--clr-gray);
+}
+
+.footer-sections {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.footer-sections .footer-section {
+  box-sizing: border-box;
+  width: 33.33%;
+  padding: 15px 0;
+}
+
+.footer-sections .footer-section .footer-title {
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.footer-sections .footer-section .footer-link {
+  color: var(--clr-gray);
+  text-decoration: none;
+}
+
+.footer-sections .footer-section .footer-link:hover {
+  text-decoration: underline;
+  transition: all 50ms linear;
+}
+
+.footer-logo {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: var(--clr-gray);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.footer-logo img {
+  float: left;
+  width: 5vh;
+  margin-right: 15px;
+  border-radius: 5px;
+}
+
+.copyright {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.version {
+  display: inline-block;
+  float: right;
+  margin-top: 10px;
+  text-decoration: none;
+  color: var(--clr-gray);
+}
+
+@media screen and (max-width: 768px) {
+  .footer-sections .footer-section {
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .footer-sections .footer-section {
+    width: 100%;
+  }
+  .copyright {
+    display: block;
+  }
+  .version {
+    display: block;
+    float: left;
+    margin-top: 2px;
+  }
+}
+
+.gear {
+  margin-bottom: -3px;
+  height: 15px;
+
+  -webkit-animation: spin 2s linear infinite;
+  -moz-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  100%{-webkit-transform: rotate(360deg)}
+}
+@-moz-keyframes spin {
+  100%{-webkit-transform: rotate(360deg)}
+}
+@keyframes spin {
+  100%{-webkit-transform: rotate(360deg)}
+}

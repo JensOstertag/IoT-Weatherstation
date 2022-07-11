@@ -1,0 +1,121 @@
+:root {
+  --clr-bright1: #ffffff;
+  --clr-dark1: #252525;
+  --clr-bright2: #e6e6e6;
+  --clr-dark2: #303030;
+  --clr-brightAccent: #252525;
+  --clr-darkAccent: #e6e6e6;
+  --clr-brightColor1: #2f7cff;
+  --clr-darkColor1: #2f7cff;
+  --clr-brightColor2: #275fda;
+  --clr-darkColor2: #275fda;
+  --clr-white: #ffffff;
+  --clr-black: #000000;
+  --clr-lightgray: #f0f0f0;
+  --clr-gray: #aaaaaa;
+  --clr-valid: #00c846;
+  --clr-medium: #ffbb00;
+  --clr-invalid: #ff0000;
+  --clr-color1: #5acd70;
+  --clr-lightcolor1: rgba(90, 205, 112, .3);
+  --clr-color2: #5a90cd;
+  --clr-lightcolor2: rgba(90, 144, 205, .3);
+  --clr-color3: #fc3e3e;
+  --clr-lightcolor3: rgba(252, 62, 62, .3);
+
+  --fnt-sizeDefault: 1.1rem;
+  --fnt-sizeSmall: .75rem;
+  --fnt-sizeSmaller: 1rem;
+  --fnt-sizeLarger: 1.5rem;
+  --fnt-sizeLarge: 2rem;
+  --fnt-weightDefault: 300;
+  --fnt-weightBolder: 500;
+}
+
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: 'Lato', sans-serif;
+  scroll-behavior: smooth;
+}
+
+p {
+  font-size: var(--fnt-sizeDefault);
+  font-weight: var(--fnt-weightDefault);
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+p.nomargin {
+  margin-bottom: 0;
+}
+
+h1 {
+  font-size: var(--fnt-sizeLarge);
+  font-weight: var(--fnt-weightBolder);
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: .5rem;
+}
+
+h1.nomargin {
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: var(--fnt-sizeLarger);
+  font-weight: var(--fnt-weightBolder);
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: .5rem;
+}
+
+h2.nomargin {
+  margin-bottom: 0;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 1.5px;
+  border-radius: 5px;
+}
+
+a {
+  color: var(--clr-brightColor1);
+  text-decoration: none;
+  transition: color 100ms linear;
+}
+
+a:hover {
+  color: var(--clr-brightColor2);
+}
+
+a.underline {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 0px;
+  }
+}
+
+::-webkit-scrollbar:hover {
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  color: var(--clr-dark1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--clr-dark1);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  background: var(--clr-black);
+}
