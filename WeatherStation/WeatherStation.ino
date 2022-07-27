@@ -4,36 +4,23 @@
 #include <ESP8266HTTPClient.h>
 ESP8266WiFiMulti wifiMulti;
 
-// BMP280
+// BME280
 #include <Wire.h>
-#include <BME280I2C.h>
-BME280I2C bmp;
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+Adafruit_BME280 bme;
 
-// API Server
-String apiServer = "localhost";
+// API Connection
+String apiServer = "API_SERVER";
 
-// MySQL
-String mysqlHost = "host:port";
-String mysqlUsername = "username";
-String mysqlPassword = "password";
-String mysqlDatabase = "database";
-String mysqlDataTable = "table";
+// Config
+#define connectionTimeout 5000
+#define pushAttempts 5
+#define deepSleepMinutes 15
+String stationKey = "STATION_KEY";
+String stationAuth = "STATION_AUTHENTICATION";
 
-// NTP
-#include <NTPClient.h>
-#include <WiFiUdp.h>
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
-
-// Data
-String date;
-String onlineSince;
-boolean bypassHardwareCheck = false;
-int deepSleepMinutes = 15;
-int wrongDateCounter = 0;
-String mac;
-
-// Weather data
+// Weather Data
 float temperature;
 float humidity;
 float pressure;
@@ -53,22 +40,17 @@ void setup() {
 
   splashScreen();
 
+  if(checkHardware() == false) {
+    Serial.println("[SETUP] Hardware Check Failed");
+    sleep();
+  }
+
   connectWiFi();
-  startNTP();
-  Serial.begin(115200);
 
   digitalWrite(connectWiFiPin, HIGH);
 
-  if(bypassHardwareCheck == false) {
-    if(checkHardware() == false) {
-      Serial.println("[SETUP] BMP280 not connected");
-      sleep();
-    }
-  }
-
-  setWeatherData(&Serial);
-  
-  uploadData();
+  setWeatherData();
+  pushData();
 
   digitalWrite(uploadDataPin, HIGH);
 
@@ -80,39 +62,24 @@ void setup() {
 void loop() {}
 
 boolean checkHardware() {
-  boolean hardwareOK = true;
-  while (!(Serial)) {}
-  Wire.begin();
-
   int badHardwareCounter = 0;
-  
-  while(!(bmp.begin())) {
+  while(!(bme.begin(0x76))) {
     badHardwareCounter++;
-    Serial.println("[BMP280] Not connected");
-    hardwareOK = false;
-
     if(badHardwareCounter >= 5) {
-      sleep();
-    } else {
-      delay(10);
+      return false;
     }
+    delay(100);
   }
 
-  switch(bmp.chipModel()) {
-    case BME280::ChipModel_BME280:
-      break;
-    case BME280::ChipModel_BMP280:
-      hardwareOK = false;
-      break;
-    default:
-      hardwareOK = false;
-  }
-
-  return hardwareOK;
+  return true;
 }
 
 void connectWiFi() {
   wakeUp();
+
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_STA);
+  
   wifiMulti.addAP("SSID1", "PASSWORD1");           // ADD ACCESSPOINT
   wifiMulti.addAP("SSID2", "PASSWORD2");           // ADD ACCESSPOINT
   wifiMulti.addAP("SSID3", "PASSWORD3");           // ADD ACCESSPOINT
@@ -120,75 +87,49 @@ void connectWiFi() {
   for(int i = 0; i < 3; i++){Serial.println();}
   Serial.println("##################################################");
   Serial.println("[WIFI] Connecting");
-  
-  while(wifiMulti.run() != WL_CONNECTED) {
-    delay(100);
-    Serial.print('.');
-  }
 
-  mac = String(WiFi.macAddress());
+  if(wifiMulti.run(5000) != WL_CONNECTED) {
+    Serial.println("[WIFI] Could not connect to WiFi");
+    sleep();
+  }
   
   Serial.println();
   Serial.print("[WIFI] Connected to: ");
   Serial.println(WiFi.SSID());
   Serial.print("[WIFI] IP Address: ");
   Serial.println(WiFi.localIP());
-  Serial.print("[WIFI] MAC Address: ");
-  Serial.println(mac);
   Serial.println("##################################################");
   for(int i = 0; i < 3; i++){Serial.println();}
 }
 
-void startNTP() {
-  timeClient.begin();
-  // BERLIN TIME OFFSET (GMT): +2 -> 7200
-  timeClient.setTimeOffset(7200);
+void setWeatherData() {
+  temperature = bme.readTemperature();
+  humidity = bme.readHumidity();
+  pressure = bme.readPressure() / 100;
 }
 
-void setWeatherData(Stream* client) {
-  float temp(NAN), humi(NAN), pres(NAN);
-  bmp.read(pres, temp, humi, BME280::TempUnit_Celsius, BME280::PresUnit_Pa);
+void pushData() {
+  String request = apiServer + "/api/push-data.php";
+  request += "?key=" + stationKey;
+  request += "&auth=" + stationAuth;
+  request += "&temp=" + String(temperature);
+  request += "&humi=" + String(humidity);
+  request += "&pres=" + String(pressure);
 
-  temperature = temp;
-  humidity = humi;
-  pressure = pres / 100;
+  Serial.println("[API] Pushing Data");
 
-  timeClient.update();
-  date = timeClient.getFormattedDate();
-}
+  WiFiClient wifi;
+  HTTPClient http;
+  http.begin(wifi, request);
 
-void uploadData() {
-  if(!(date.startsWith("1970-01-01T"))) {
-    if(wrongDateCounter <= 5) {
-      String request = apiServer + "/weatherstation-post-data.php";
-      request += "?host=" + mysqlHost;
-      request += "&username=" + mysqlUsername;
-      request += "&password=" + mysqlPassword;
-      request += "&database=" + mysqlDatabase;
-      request += "&tablename=" + mysqlDataTable;
-      request += "&temp=" + String(temperature);
-      request += "&humi=" + String(humidity);
-      request += "&pres=" + String(pressure);
-      request += "&date=" + date;
+  int httpCode = 0;
+  int attempt = 0;
+  
+  do {
+    httpCode = http.GET();
+  } while(httpCode != HTTP_CODE_OK && attempt < pushAttempts);
 
-      Serial.println(request);
-
-      Serial.println("[MYSQL] Uploading data");
-
-      HTTPClient http;
-      http.begin(request);
-
-      int httpCode = http.GET();
-
-      if(httpCode > 0) {if(httpCode == HTTP_CODE_OK) {}}
-
-      http.end();
-    }
-  } else {
-    wrongDateCounter++;
-    setWeatherData(&Serial);
-    uploadData();
-  }
+  http.end();
 }
 
 void wakeUp() {
@@ -206,7 +147,7 @@ void splashScreen() {
   Serial.println("###################################################");
   Serial.println("###                                             ###");
   Serial.println("###   Project: IoT Weather Station              ###");
-  Serial.println("###   Version: v2.5                             ###");
+  Serial.println("###   Version: v3.0                             ###");
   Serial.println("###   Board: WeMos D1 MINI                      ###");
   Serial.println("###   Author: Jens Ostertag                     ###");
   Serial.println("###   GitHub: https://github.com/JensOstertag   ###");
