@@ -32,7 +32,7 @@
       $stationKey = $weatherStation->StationKey;
       $stationAuthor = $weatherStation->UserName;
 
-      $searchData = $con->prepare("SELECT * FROM WeatherData WHERE StationID = ? ORDER BY Date DESC LIMIT 1");
+      $searchData = $con->prepare("SELECT * FROM WeatherData WHERE StationID = ? ORDER BY PushDate DESC LIMIT 1");
       $searchData->bind_param("i", $stationID);
       $searchData->execute();
       $searchDataResult = $searchData->get_result();
@@ -112,7 +112,7 @@
           echo "<p><b>Station Name:</b> $stationName<br><b>Station Location:</b> $stationLocation<br><b>Station Author:</b> $stationAuthor<br><b>Station Key:</b> $stationKey</p>";
 
           if(isset($latestPush) && isset($latestTemperature) && isset($latestHumidity) && isset($latestPressure)) {
-            echo "<p><b>Last Data Push:</p> $latestPush<br><b>Last Measured Temperature:</b> $latestTemperature °C<br><b>Last Measured Humidity:</b> $latestHumidity %<br><b>Last Measured Pressure:</b> $latestPressure</p>";
+            echo "<p><b>Last Data Push:</p> $latestPush<br><b>Last Measured Temperature:</b> $latestTemperature °C<br><b>Last Measured Humidity:</b> $latestHumidity %<br><b>Last Measured Pressure:</b> $latestPressure hPa</p>";
           } else {
             echo "<p>There is no Data for this Weather Station yet.</p>";
           }
