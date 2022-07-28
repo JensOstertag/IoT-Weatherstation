@@ -222,6 +222,12 @@ form .section-controls-shown button {
   border-radius: 3px;
 }
 
+@media screen and (max-width: 768px) {
+  .station-list .station-list-item {
+    width: 100%;
+  }
+}
+
 .station-list .station-list-item #station-name {
   font-size: var(--fnt-sizeDefault);
   margin-bottom: .25rem;
